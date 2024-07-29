@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>AnonyText</title>
+</head>
+
+<body>
+    <h1>AnonyText</h1>
+    <form method="post">
+        <textarea name="text" rows="10" cols="50"></textarea><br>
+        <input type="submit" value="Redact">
+    </form>
+    {% if original_text %}
+    <h2>Original Text</h2>
+    <p>{{ original_text }}</p>
+    <h2>Redacted Text</h2>
+    <p>{{ redacted_text }}</p>
+    {% endif %}
+</body>
+
+</html>
