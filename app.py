@@ -15,12 +15,30 @@ def redact_text(text):
 
     redacted_text = text
     for key, pattern in patterns.items():
-        redacted_text = re.sub(pattern, f'[REDACTED {key}]', redacted_text)
+        redacted_text = re.sub(pattern, f'[REDACTED-{key}]', redacted_text)
 
     doc = nlp(redacted_text)
+
     for ent in doc.ents:
-        if ent.label_ in ['PERSON', 'GPE', 'ORG', 'DATE', 'ADDRESS', 'MONEY', 'LOC']:
-            redacted_text = redacted_text.replace(ent.text, '[REDACTED]')
+        label = ''
+        if ent.label_ == 'PERSON':
+            label = 'NAME'
+        elif ent.label_ in ['GPE', 'LOC', 'ORG', 'ADDRESS']:
+            label = 'POSSIBLE-ADDRESS'
+        elif ent.label_ in ['DATE', 'MONEY']:
+            label = ent.label_
+
+        if label:
+            redacted_text = re.sub(r'\b{}\b'.format(re.escape(ent.text)), f'[REDACTED-{label}]', redacted_text)
+
+    words_list = redacted_text.split()
+    for i, word in enumerate(words_list):
+        if word.istitle() and len(word) > 1:  
+            if i == 0 or words_list[i-1].endswith(('.', '!', '?')):
+                continue 
+            words_list[i] = '[REDACTED-NAME]'
+
+    redacted_text = ' '.join(words_list)
 
     return redacted_text
 
